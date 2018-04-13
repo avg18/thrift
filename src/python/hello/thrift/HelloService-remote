@@ -26,6 +26,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Functions:')
     print('  void ping()')
     print('  string hello(string name)')
+    print('  string fetch_documents()')
+    print('  string fetch_descriptions()')
+    print('  string fetch_document(string id)')
     print('')
     sys.exit(0)
 
@@ -116,6 +119,24 @@ elif cmd == 'hello':
         print('hello requires 1 args')
         sys.exit(1)
     pp.pprint(client.hello(args[0],))
+
+elif cmd == 'fetch_documents':
+    if len(args) != 0:
+        print('fetch_documents requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.fetch_documents())
+
+elif cmd == 'fetch_descriptions':
+    if len(args) != 0:
+        print('fetch_descriptions requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.fetch_descriptions())
+
+elif cmd == 'fetch_document':
+    if len(args) != 1:
+        print('fetch_document requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.fetch_document(args[0],))
 
 else:
     print('Unrecognized method %s' % cmd)

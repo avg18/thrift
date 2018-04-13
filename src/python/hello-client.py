@@ -17,9 +17,8 @@
 # under the License.
 #
 
-import sys
-import glob
-
+import json
+import uuid
 from hello.thrift import HelloService
 
 from thrift import Thrift
@@ -27,10 +26,16 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
+import logging
+
+log = logging.getLogger()
+log.setLevel(logging.DEBUG)
+
+DOMAIN = "localhost"
 
 def main():
     # Make socket
-    transport = TSocket.TSocket('localhost', 9090)
+    transport = TSocket.TSocket(DOMAIN, 9090)
 
     # Buffering is critical. Raw sockets are very slow
     transport = TTransport.TBufferedTransport(transport)
@@ -44,8 +49,18 @@ def main():
     # Connect!
     transport.open()
 
-    client.ping()
-    print('ping()')
+    logging.info( f'connected ... {client.hello(DOMAIN)}')
+
+    _documents = eval(client.fetch_documents())
+    logging.info(_documents)
+   
+    _descriptions = eval(client.fetch_descriptions())
+    logging.info(_descriptions)
+    logging.info(type(_descriptions))
+
+    _document = eval(client.fetch_document(_descriptions[1]['id']))
+    logging.info(_document)
+    logging.info(f'Dokument {type(_document)}')
 
     # Close!
     transport.close()

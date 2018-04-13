@@ -11,4 +11,10 @@ service HelloService {
     ) throws (
         1: exceptions.EUnknown ie
     )
+    string fetch_documents()
+    string fetch_descriptions()
+    string fetch_document(
+        
+        1: required string id
+    )
 }
