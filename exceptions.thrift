@@ -1,4 +1,4 @@
-namespace py hello.exceptions
+namespace py documentstore.exceptions
  
 /**
  * Unknown Exceptions

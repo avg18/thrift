@@ -19,8 +19,8 @@
 
 import json
 import uuid
-from hello.thrift import HelloService
-from hello.exceptions.ttypes import EUnknown
+from documentstore.thrift import HelloService
+from documentstore.exceptions.ttypes import EUnknown
 
 from thrift import Thrift
 from thrift.transport import TSocket

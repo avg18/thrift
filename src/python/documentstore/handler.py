@@ -20,7 +20,7 @@ class HelloHandler:
 
 
     # -------------------------------------------------------------------------
-    # -------------- Thrift - HelloService Implementation -------------
+    # -------------- Thrift - documentstore Implementation -------------
     # -------------------------------------------------------------------------
 
     def ping(self):
@@ -37,9 +37,10 @@ class HelloHandler:
         doc = get_document(id)
 
         logging.info(doc)
+
         if doc is None:            
-            ex = EUnknown('Unknown ID')
-            logging.info(ex)
+            ex = EUnknown(f'Unknown ID {id}')
+            logging.info(f'fetch_documents::{ex}')
             raise ex
         else:
             return str(doc)

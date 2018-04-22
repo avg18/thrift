@@ -1,4 +1,4 @@
-namespace py hello.thrift
+namespace py documentstore.thrift
  
 include "exceptions.thrift"
  

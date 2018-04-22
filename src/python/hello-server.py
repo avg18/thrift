@@ -6,8 +6,8 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer
  
-from hello.thrift import HelloService
-from hello.handler import HelloHandler
+from documentstore.thrift import HelloService
+from documentstore.handler import HelloHandler
  
 PORT = 9090
 
