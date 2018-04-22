@@ -13,8 +13,15 @@ service HelloService {
     )
     string fetch_documents()
     string fetch_descriptions()
-    string fetch_document(
-        
+    string fetch_document(        
         1: required string id
+    ) throws (
+        1: exceptions.EUnknown ie
+    )
+    string change_description(        
+        1: required string id
+        2: required string description
+    ) throws (
+        1: exceptions.EUnknown ie
     )
 }

@@ -20,6 +20,7 @@
 import json
 import uuid
 from hello.thrift import HelloService
+from hello.exceptions.ttypes import EUnknown
 
 from thrift import Thrift
 from thrift.transport import TSocket
@@ -36,14 +37,8 @@ DOMAIN = "localhost"
 def main():
     # Make socket
     transport = TSocket.TSocket(DOMAIN, 9090)
-
-    # Buffering is critical. Raw sockets are very slow
     transport = TTransport.TBufferedTransport(transport)
-
-    # Wrap in a protocol
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
-
-    # Create a client to use the protocol encoder
     client = HelloService.Client(protocol)
 
     # Connect!
@@ -51,17 +46,33 @@ def main():
 
     logging.info( f'connected ... {client.hello(DOMAIN)}')
 
+    
+    # Document and description Tests
+
     _documents = eval(client.fetch_documents())
-    logging.info(_documents)
+    logging.info(f'DOKUMENT: {_documents}')
    
     _descriptions = eval(client.fetch_descriptions())
-    logging.info(_descriptions)
-    logging.info(type(_descriptions))
+    logging.info(f'DOKUMENT: {_descriptions}')
 
-    _document = eval(client.fetch_document(_descriptions[1]['id']))
-    logging.info(_document)
-    logging.info(f'Dokument {type(_document)}')
 
+    # Document and description Tests with exception
+    try:
+        _document = eval(client.fetch_document(_descriptions[1]['id']))
+    except EUnknown as e:
+        logging.info(f'Unknown Exception: {e}')
+
+    try:
+        _document = eval(client.fetch_document('d4lf2e5e-8923-4f11-861c-2d6d09ce6b0e'))
+    except EUnknown as e:
+        logging.info(f'Unknown Exception: {e}')
+
+    try:
+        _change = eval(client.change_description(_descriptions[1]['id'], 'anders'))
+    except EUnknown as e:
+        logging.info(f'Unknown Exception: {e}')
+
+    
     # Close!
     transport.close()
 

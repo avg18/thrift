@@ -52,7 +52,23 @@ def get_documents():
     return str(DOC)
 
 def get_document(id):
-    return str(DOC.get(id))
+
+    return DOC.get(id)
+
+def change_description(id, abstract):
+    
+    if not valid_uuid(id):
+        return None
+
+    _id = uuid.UUID(id)
+    doc = DOC.get(_id)
+
+    if doc is None:
+        return None
+
+    doc['description'] = abstract
+    
+    return _id
  
 
 def get_descriptions():

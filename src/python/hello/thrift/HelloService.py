@@ -42,6 +42,14 @@ class Iface(object):
         """
         pass
 
+    def change_description(self, id, description):
+        """
+        Parameters:
+         - id
+         - description
+        """
+        pass
+
 
 class Client(Iface):
     def __init__(self, iprot, oprot=None):
@@ -188,7 +196,44 @@ class Client(Iface):
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
+        if result.ie is not None:
+            raise result.ie
         raise TApplicationException(TApplicationException.MISSING_RESULT, "fetch_document failed: unknown result")
+
+    def change_description(self, id, description):
+        """
+        Parameters:
+         - id
+         - description
+        """
+        self.send_change_description(id, description)
+        return self.recv_change_description()
+
+    def send_change_description(self, id, description):
+        self._oprot.writeMessageBegin('change_description', TMessageType.CALL, self._seqid)
+        args = change_description_args()
+        args.id = id
+        args.description = description
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_change_description(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = change_description_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ie is not None:
+            raise result.ie
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "change_description failed: unknown result")
 
 
 class Processor(Iface, TProcessor):
@@ -200,6 +245,7 @@ class Processor(Iface, TProcessor):
         self._processMap["fetch_documents"] = Processor.process_fetch_documents
         self._processMap["fetch_descriptions"] = Processor.process_fetch_descriptions
         self._processMap["fetch_document"] = Processor.process_fetch_document
+        self._processMap["change_description"] = Processor.process_change_description
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -321,6 +367,9 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
+        except hello.exceptions.ttypes.EUnknown as ie:
+            msg_type = TMessageType.REPLY
+            result.ie = ie
         except TApplicationException as ex:
             logging.exception('TApplication exception in handler')
             msg_type = TMessageType.EXCEPTION
@@ -330,6 +379,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("fetch_document", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_change_description(self, seqid, iprot, oprot):
+        args = change_description_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = change_description_result()
+        try:
+            result.success = self._handler.change_description(args.id, args.description)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except hello.exceptions.ttypes.EUnknown as ie:
+            msg_type = TMessageType.REPLY
+            result.ie = ie
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("change_description", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -832,11 +907,13 @@ class fetch_document_result(object):
     """
     Attributes:
      - success
+     - ie
     """
 
 
-    def __init__(self, success=None,):
+    def __init__(self, success=None, ie=None,):
         self.success = success
+        self.ie = ie
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -852,6 +929,12 @@ class fetch_document_result(object):
                     self.success = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ie = hello.exceptions.ttypes.EUnknown()
+                    self.ie.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -865,6 +948,10 @@ class fetch_document_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRING, 0)
             oprot.writeString(self.success.encode('utf-8') if sys.version_info[0] == 2 else self.success)
+            oprot.writeFieldEnd()
+        if self.ie is not None:
+            oprot.writeFieldBegin('ie', TType.STRUCT, 1)
+            self.ie.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -885,6 +972,157 @@ class fetch_document_result(object):
 all_structs.append(fetch_document_result)
 fetch_document_result.thrift_spec = (
     (0, TType.STRING, 'success', 'UTF8', None, ),  # 0
+    (1, TType.STRUCT, 'ie', [hello.exceptions.ttypes.EUnknown, None], None, ),  # 1
+)
+
+
+class change_description_args(object):
+    """
+    Attributes:
+     - id
+     - description
+    """
+
+
+    def __init__(self, id=None, description=None,):
+        self.id = id
+        self.description = description
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.id = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.description = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('change_description_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.STRING, 1)
+            oprot.writeString(self.id.encode('utf-8') if sys.version_info[0] == 2 else self.id)
+            oprot.writeFieldEnd()
+        if self.description is not None:
+            oprot.writeFieldBegin('description', TType.STRING, 2)
+            oprot.writeString(self.description.encode('utf-8') if sys.version_info[0] == 2 else self.description)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        if self.id is None:
+            raise TProtocolException(message='Required field id is unset!')
+        if self.description is None:
+            raise TProtocolException(message='Required field description is unset!')
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(change_description_args)
+change_description_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'id', 'UTF8', None, ),  # 1
+    (2, TType.STRING, 'description', 'UTF8', None, ),  # 2
+)
+
+
+class change_description_result(object):
+    """
+    Attributes:
+     - success
+     - ie
+    """
+
+
+    def __init__(self, success=None, ie=None,):
+        self.success = success
+        self.ie = ie
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRING:
+                    self.success = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ie = hello.exceptions.ttypes.EUnknown()
+                    self.ie.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('change_description_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRING, 0)
+            oprot.writeString(self.success.encode('utf-8') if sys.version_info[0] == 2 else self.success)
+            oprot.writeFieldEnd()
+        if self.ie is not None:
+            oprot.writeFieldBegin('ie', TType.STRUCT, 1)
+            self.ie.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(change_description_result)
+change_description_result.thrift_spec = (
+    (0, TType.STRING, 'success', 'UTF8', None, ),  # 0
+    (1, TType.STRUCT, 'ie', [hello.exceptions.ttypes.EUnknown, None], None, ),  # 1
 )
 fix_spec(all_structs)
 del all_structs

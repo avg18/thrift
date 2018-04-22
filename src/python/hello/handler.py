@@ -2,7 +2,7 @@ import logging
 
 from .exceptions.ttypes import EUnknown
 
-from .documents.document import Document,get_documents, get_descriptions, get_document
+from .documents.document import Document,get_documents, get_descriptions, get_document, change_description
 from .documents.doc_mock import dummy
 
 class HelloHandler:
@@ -34,10 +34,27 @@ class HelloHandler:
         return get_documents()
 
     def fetch_document(self, id):
-        return get_document(id)
+        doc = get_document(id)
+
+        logging.info(doc)
+        if doc is None:            
+            ex = EUnknown('Unknown ID')
+            logging.info(ex)
+            raise ex
+        else:
+            return str(doc)
     
     def fetch_descriptions(self):
         return get_descriptions()
+    
+    def change_description(self, id, description):
+        change = change_description(id, description)
+        if change is None:            
+            ex = EUnknown('Unknown ID')
+            logging.info(ex)
+            raise ex
+        else:
+            return str(f'Dokument {change} geändert')
  
 if __name__ == '__main__':
     

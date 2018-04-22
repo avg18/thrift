@@ -29,6 +29,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  string fetch_documents()')
     print('  string fetch_descriptions()')
     print('  string fetch_document(string id)')
+    print('  string change_description(string id, string description)')
     print('')
     sys.exit(0)
 
@@ -137,6 +138,12 @@ elif cmd == 'fetch_document':
         print('fetch_document requires 1 args')
         sys.exit(1)
     pp.pprint(client.fetch_document(args[0],))
+
+elif cmd == 'change_description':
+    if len(args) != 2:
+        print('change_description requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.change_description(args[0], args[1],))
 
 else:
     print('Unrecognized method %s' % cmd)
